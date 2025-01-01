@@ -1,6 +1,10 @@
 package com.rocketseat.planner.trip;
 
 import com.rocketseat.planner.activity.*;
+import com.rocketseat.planner.link.LinkData;
+import com.rocketseat.planner.link.LinkRequestPayload;
+import com.rocketseat.planner.link.LinkResponse;
+import com.rocketseat.planner.link.LinkService;
 import com.rocketseat.planner.participant.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +30,9 @@ public class TripController {
 
     @Autowired
     private TripRepository tripRepository;
+
+    @Autowired
+    private LinkService linkService;
 
     @PostMapping
     public ResponseEntity<TripCreateResponse> createTrip(@RequestBody TripRequestPayload payload) {
@@ -130,5 +137,31 @@ public class TripController {
         }
 
         return ResponseEntity.ok(activity);
+    }
+
+    @PostMapping({"/{tripId}/links"})
+    public ResponseEntity<LinkResponse> registerLink(@PathVariable UUID tripId, @RequestBody LinkRequestPayload payload) {
+        Optional<Trip> trip = tripRepository.findById(tripId);
+
+        if (trip.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Trip updatedTrip = trip.get();
+
+        LinkResponse linkResponse = linkService.registerLink(payload, updatedTrip);
+
+        return ResponseEntity.ok(linkResponse);
+    }
+
+    @GetMapping({"/{tripId}/links"})
+    public ResponseEntity<List<LinkData>> getLinks(@PathVariable UUID tripId) {
+        List<LinkData> links = linkService.getAllLinksFromTripId(tripId);
+
+        if (links.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(links);
     }
 }
