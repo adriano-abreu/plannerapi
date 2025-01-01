@@ -24,7 +24,7 @@ public class LinkService {
 
     public List<LinkData> getAllLinksFromTripId(UUID tripId) {
 
-        return linkRepository.findAllByTripId(tripId)
+        return linkRepository.findByTripId(tripId)
                 .stream()
                 .map(link ->
                         new LinkData(
